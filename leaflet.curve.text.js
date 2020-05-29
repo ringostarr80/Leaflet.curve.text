@@ -331,7 +331,7 @@ L.Curve = L.Path.extend({
 					this.expectedIdToBeInserted = id;
 				}
 			} else {
-				console.warn('SVGPathEditor is not available. Fallback to flipping the text!');
+				console.warn('SVGPathEditor is not available (see: https://github.com/Pomax/svg-path-reverse). Fallback to flipping the text!');
 				options.orientation = 'flip';
 			}
 		}
