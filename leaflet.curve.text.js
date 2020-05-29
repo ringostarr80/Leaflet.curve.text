@@ -303,7 +303,7 @@ L.Curve = L.Path.extend({
 		const textNode = L.SVG.create('text');
 		const textPath = L.SVG.create('textPath');
 
-		const dy = options.offset;
+		const dy = options.offset || this._path.getAttribute('stroke-width');
 
 		textPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", '#' + id);
 
