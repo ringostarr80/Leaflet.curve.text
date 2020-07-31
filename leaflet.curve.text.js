@@ -256,6 +256,7 @@ L.Curve = L.Path.extend({
 			fillColor: 'green',
 			attributes: {},
 			below: false,
+			above: false,
 			offset: 20,
 			orientation :180,
 			center : true
@@ -285,7 +286,10 @@ L.Curve = L.Path.extend({
 						reversedPathElement1.parentNode.removeChild(reversedPathElement1);
 					}
 				}
-				this._map._renderer._container.removeChild(this._textNode);
+				//this._map._renderer._container.removeChild(this._textNode);
+				if (this._textNode.parentNode) {
+					this._textNode.parentNode.removeChild(this._textNode);
+				}
 				/* delete the node, so it will not be removed a 2nd time if the layer is later removed from the map */
 				delete this._textNode;
 			}
@@ -347,6 +351,17 @@ L.Curve = L.Path.extend({
 
 		if (options.below) {
 			svg.insertBefore(textNode, svg.firstChild);
+		} else if (options.above) {
+			const refElement = document.getElementById(id);
+			if (refElement) {
+				if (refElement.nextSibling) {
+					refElement.parentNode.insertBefore(textNode, refElement.nextSibling);
+				} else {
+					refElement.parentNode.appendChild(textNode);
+				}
+			} else {
+				console.warn('unable to find ref-element (' + id + ') for text-path!');
+			}
 		} else {
 			svg.appendChild(textNode);
 		}
