@@ -117,7 +117,7 @@ L.Curve = L.Path.extend({
 
 	setPath: function(path) {
 		this._setPath(path);
-		return this.redrawText();
+		return this.redraw()._redrawText();
 	},
 
 	getBounds: function() {
