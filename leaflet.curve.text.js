@@ -222,6 +222,10 @@ L.Curve = L.Path.extend({
 		this._updatePath();
 	},
 
+	_updateBounds: function() {
+		// Empty function to satisfy L.Path.setStyle() method
+	},
+
 	_updatePath: function() {
 		this._renderer._updatecurve(this);
 		this._redrawText();
@@ -245,6 +249,8 @@ L.Curve = L.Path.extend({
 
 	setText: function(text, options)
 	{
+		//console.log('Curve.setText(text, options)', text, options);
+
 		this.expectedIdToBeInserted = null;
 		this._text = text;
 		this._textOptions = options;
