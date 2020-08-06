@@ -269,36 +269,35 @@ L.Curve = L.Path.extend({
 		};
 		options = L.Util.extend(defaults, options);
 
-		if (!text) {
-			if (this._textNode && this._textNode.parentNode) {
-				if (this._textNode.childNodes && this._textNode.childNodes instanceof NodeList) {
-					for(const childNode of this._textNode.childNodes) {
-						const xlinkHrefAttr = childNode.attributes.getNamedItem('xlink:href');
-						if (!xlinkHrefAttr) {
-							continue;
-						}
-
-						const xlinkHref = xlinkHrefAttr.value;
-						const xlinkHrefReversedMatch = xlinkHref.match(/-reversed$/);
-						if (!xlinkHrefReversedMatch) {
-							continue;
-						}
-
-						const reversedPathElement1 = document.querySelector(xlinkHref);
-						if (!reversedPathElement1) {
-							continue;
-						}
-
-						reversedPathElement1.parentNode.removeChild(reversedPathElement1);
+		if (this._textNode && this._textNode.parentNode) {
+			if (this._textNode.childNodes && this._textNode.childNodes instanceof NodeList) {
+				for(const childNode of this._textNode.childNodes) {
+					const xlinkHrefAttr = childNode.attributes.getNamedItem('xlink:href');
+					if (!xlinkHrefAttr) {
+						continue;
 					}
+
+					const xlinkHref = xlinkHrefAttr.value;
+					const xlinkHrefReversedMatch = xlinkHref.match(/-reversed$/);
+					if (!xlinkHrefReversedMatch) {
+						continue;
+					}
+
+					const reversedPathElement1 = document.querySelector(xlinkHref);
+					if (!reversedPathElement1) {
+						continue;
+					}
+
+					reversedPathElement1.parentNode.removeChild(reversedPathElement1);
 				}
-				//this._map._renderer._container.removeChild(this._textNode);
-				if (this._textNode.parentNode) {
-					this._textNode.parentNode.removeChild(this._textNode);
-				}
-				/* delete the node, so it will not be removed a 2nd time if the layer is later removed from the map */
-				delete this._textNode;
 			}
+			if (this._textNode.parentNode) {
+				this._textNode.parentNode.removeChild(this._textNode);
+			}
+			/* delete the node, so it will not be removed a 2nd time if the layer is later removed from the map */
+			delete this._textNode;
+		}
+		if (!text) {
 			return this;
 		}
 
@@ -346,6 +345,9 @@ L.Curve = L.Path.extend({
 			}
 		}
 
+		if (this._textZIndex !== undefined && this._textZIndex !== null) {
+			textNode.setAttribute('data-z-index', this._textZIndex);
+		}
 		textNode.setAttribute('dy', dy);
 		for(const attr in options.attributes) {
 			textNode.setAttribute(attr, options.attributes[attr]);
@@ -369,7 +371,13 @@ L.Curve = L.Path.extend({
 				console.warn('unable to find ref-element (' + id + ') for text-path!');
 			}
 		} else {
-			svg.appendChild(textNode);
+			let textOverlayGroup = svg.querySelector('g.text-overlay');
+			if (!textOverlayGroup) {
+				textOverlayGroup = L.SVG.create('g');
+				textOverlayGroup.setAttribute('class', 'text-overlay');
+				svg.appendChild(textOverlayGroup);
+			}
+			textOverlayGroup.appendChild(textNode);
 		}
 
 		/* Center text according to the path's bounding box */
@@ -404,8 +412,67 @@ L.Curve = L.Path.extend({
 			textNode.setAttribute('transform','rotate(' + rotateAngle + ' '  + rotatecenterX + ' ' + rotatecenterY + ')');
 		}
 
+		this._checkTextZIndex();
+
 		/*---return the modified element back */
 		return this;
+	},
+	getTextZIndex: function() {
+		return this._textZIndex;
+	},
+	setTextZIndex: function(zIndex) {
+		this._textZIndex = zIndex;
+
+		return this;
+	},
+	_checkTextZIndex() {
+		if (!this._textOptions) {
+			return;
+		}
+		if (this._textOptions.above || this._textOptions.below) {
+			return;
+		}
+
+		if (!this._textNode) {
+			return;
+		}
+		const dataZIndexAttr = this._textNode.attributes.getNamedItem('data-z-index');
+		if (!dataZIndexAttr) {
+			return;
+		}
+
+		const zIndex = parseInt(dataZIndexAttr.value);
+		if (isNaN(zIndex)) {
+			return;
+		}
+
+		if (!this._map) {
+			return;
+		}
+		if (!this._map._renderer) {
+			return;
+		}
+		if (!this._map._renderer._container) {
+			return;
+		}
+
+		const svg = this._map._renderer._container;
+		const textsWithZIndex = svg.querySelectorAll('g.text-overlay > text[data-z-index]');
+		for(const textWithZIndex of textsWithZIndex) {
+			const zIndexAttr = textWithZIndex.attributes.getNamedItem('data-z-index');
+			if (!zIndexAttr) {
+				continue;
+			}
+			const currentZIndex = parseInt(zIndexAttr.value);
+			if (isNaN(currentZIndex)) {
+				continue;
+			}
+
+			if (currentZIndex > zIndex) {
+				textWithZIndex.parentNode.insertBefore(this._textNode, textWithZIndex);
+				break;
+			}
+		}
 	},
 	_project: function() {
 		let coord;
