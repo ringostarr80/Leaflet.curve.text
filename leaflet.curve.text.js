@@ -441,9 +441,13 @@ L.Curve = L.Path.extend({
 			}
 
 			if (this._popup) {
-				L.DomEvent.on(textNode, 'click', () => {
+				L.DomEvent.on(textNode, 'click', evt => {
+					let latLng;
+					if (this._map) {
+						latLng = this._map.containerPointToLatLng([evt.clientX, evt.clientY]);
+					}
 					setTimeout(() => {
-						this.openPopup();
+						this.openPopup(latLng);
 					}, 1);
 				});
 			}
