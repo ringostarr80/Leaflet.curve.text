@@ -1,3 +1,6 @@
+/* eslint-disable new-cap */
+/* eslint-disable no-undef */
+/* eslint-disable object-shorthand */
 /*
  * Leaflet.curve.text v1.0.0 - a plugin for Leaflet mapping library for adding Text to curve path.
  * Leaflet.curve.text is forked from https://github.com/gautamGS/Leaflet.curve.text
@@ -15,7 +18,7 @@ L.Curve = L.Path.extend({
 	initialize: function(path, options) {
 		const instance = this;
 		this.expectedIdToBeInserted = null;
-		this.mutationObserver = new MutationObserver(function(mutationList, observer) {
+		this.mutationObserver = new MutationObserver((mutationList, observer) => {
 			if (!(SVGPathEditor && typeof SVGPathEditor.reverse === 'function')) {
 				return;
 			}
@@ -38,7 +41,8 @@ L.Curve = L.Path.extend({
 						if (dataOptions.center) {
 							const textLength = instance._textNode.getComputedTextLength();
 							const pathLength = instance._path.getTotalLength();
-							/* Set the position for the left side of the textNode */
+
+							// Set the position for the left side of the textNode
 							instance._textNode.setAttribute('dx', ((pathLength / 2) - (textLength / 2)));
 							instance._textNode.removeAttribute('data-options');
 						}
@@ -55,20 +59,20 @@ L.Curve = L.Path.extend({
 						if (addedNode.id !== instance.expectedIdToBeInserted) {
 							continue;
 						}
-	
+
 						const dAttr = addedNode.attributes.getNamedItem('d');
 						if (!dAttr) {
 							continue;
 						}
-	
+
 						const d = dAttr.value;
 						const dReversed = SVGPathEditor.reverse(d);
 						const reversedPathElement = addedNode.cloneNode(true);
 						reversedPathElement.setAttribute('d', dReversed);
-						reversedPathElement.setAttribute('id', addedNode.id + '-reversed');
+						reversedPathElement.setAttribute('id', `${addedNode.id}-reversed`);
 						reversedPathElement.setAttribute('stroke-opacity', '0');
 						addedNode.parentNode.insertBefore(reversedPathElement, addedNode);
-						instance._textNode.firstChild.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", '#' + addedNode.id + '-reversed');
+						instance._textNode.firstChild.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${addedNode.id}-reversed`);
 					}
 				}
 
@@ -83,7 +87,7 @@ L.Curve = L.Path.extend({
 						continue;
 					}
 
-					const textPathReference = document.querySelector('textPath[*|href="#' + removedNode.id + '"]');
+					const textPathReference = document.querySelector(`textPath[*|href="#${removedNode.id}"]`);
 					if (textPathReference && instance.expectedIdToBeInserted) {
 						const textReference = textPathReference.parentNode;
 						if (textReference && textReference.parentNode) {
@@ -91,7 +95,7 @@ L.Curve = L.Path.extend({
 						}
 					}
 
-					const reversedId = removedNode.id + '-reversed';
+					const reversedId = `${removedNode.id}-reversed`;
 					const reversedElement = document.getElementById(reversedId);
 					if (!reversedElement) {
 						continue;
@@ -133,13 +137,13 @@ L.Curve = L.Path.extend({
 		const bound = new L.LatLngBounds();
 		let lastPoint;
 		let lastCommand;
-		for(let i = 0; i < this._coords.length; i++){
+		for(let i = 0; i < this._coords.length; i++) {
 			let coord = this._coords[i];
 			if (typeof coord === 'string' || coord instanceof String) {
 				lastCommand = coord;
 			} else if (lastCommand === 'H') {
-				bound.extend([lastPoint.lat,coord[0]]);
-				lastPoint = new L.latLng(lastPoint.lat,coord[0]);
+				bound.extend([lastPoint.lat, coord[0]]);
+				lastPoint = new L.latLng(lastPoint.lat, coord[0]);
 			} else if (lastCommand === 'V') {
 				bound.extend([coord[0], lastPoint.lng]);
 				lastPoint = new L.latLng(coord[0], lastPoint.lng);
@@ -163,7 +167,7 @@ L.Curve = L.Path.extend({
 				const endPoint = new L.latLng(coord[0], coord[1]);
 
 				let controlPoint1 = lastPoint;
-				if(lastPoint.controlPoint2){
+				if (lastPoint.controlPoint2) {
 					const diffLat = lastPoint.lat - lastPoint.controlPoint2.lat;
 					const diffLng = lastPoint.lng - lastPoint.controlPoint2.lng;
 					controlPoint1 = new L.latLng(lastPoint.lat + diffLat, lastPoint.lng + diffLng);
@@ -190,7 +194,7 @@ L.Curve = L.Path.extend({
 				const endPoint = new L.latLng(coord[0], coord[1]);
 
 				let controlPoint = lastPoint;
-				if(lastPoint.controlPoint){
+				if (lastPoint.controlPoint) {
 					const diffLat = lastPoint.lat - lastPoint.controlPoint.lat;
 					const diffLng = lastPoint.lng - lastPoint.controlPoint.lng;
 					controlPoint = new L.latLng(lastPoint.lat + diffLat, lastPoint.lng + diffLng);
@@ -209,8 +213,8 @@ L.Curve = L.Path.extend({
 		return bound;
 	},
 
-	//TODO: use a centroid algorithm instead
-	getCenter: function () {
+	// TODO: use a centroid algorithm instead
+	getCenter: function() {
 		return this._bounds.getCenter();
 	},
 
@@ -247,9 +251,8 @@ L.Curve = L.Path.extend({
 		return this;
 	},
 
-	setText: function(text, options)
-	{
-		//console.log('Curve.setText(text, options)', text, options);
+	setText: function(text, options) {
+		// console.log('Curve.setText(text, options)', text, options);
 
 		this.expectedIdToBeInserted = null;
 		this._text = text;
@@ -264,9 +267,10 @@ L.Curve = L.Path.extend({
 			below: false,
 			above: false,
 			offset: 20,
-			orientation :180,
-			center : true
+			orientation: 180,
+			center: true
 		};
+		// eslint-disable-next-line no-param-reassign
 		options = L.Util.extend(defaults, options);
 
 		if (this._textNode && this._textNode.parentNode) {
@@ -294,17 +298,19 @@ L.Curve = L.Path.extend({
 			if (this._textNode.parentNode) {
 				this._textNode.parentNode.removeChild(this._textNode);
 			}
-			/* delete the node, so it will not be removed a 2nd time if the layer is later removed from the map */
+
+			// delete the node, so it will not be removed a 2nd time if the layer is later removed from the map
 			delete this._textNode;
 		}
 		if (!text) {
 			return this;
 		}
 
-		//replace texts Non breakable spaces
-		text = text.replace(/ /g, '\u00A0');  // Non breakable spaces
+		// replace texts Non breakable spaces
+		// eslint-disable-next-line no-param-reassign
+		text = text.replace(/ /g, '\u00A0');
 
-		const id = 'curvepathdef-' + L.Util.stamp(this);
+		const id = `curvepathdef-${L.Util.stamp(this)}`;
 		const svg = this._map._renderer._container;
 		this._path.setAttribute('id', id);
 
@@ -314,14 +320,15 @@ L.Curve = L.Path.extend({
 
 		const dy = options.offset || this._path.getAttribute('stroke-width');
 
-		textPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", '#' + id);
+		textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${id}`);
 
-		let reversedPathElement = document.getElementById(id + '-reversed');
+		let reversedPathElement = document.getElementById(`${id}-reversed`);
 		if (reversedPathElement) {
 			reversedPathElement.parentNode.removeChild(reversedPathElement);
 		}
 		if (options.orientation === 'reverse') {
 			if (SVGPathEditor && typeof SVGPathEditor.reverse === 'function') {
+				// eslint-disable-next-line no-param-reassign
 				options.orientation = 0;
 				const pathElement = document.getElementById(id);
 				if (pathElement) {
@@ -331,16 +338,17 @@ L.Curve = L.Path.extend({
 						const dReversed = SVGPathEditor.reverse(d);
 						reversedPathElement = pathElement.cloneNode(true);
 						reversedPathElement.setAttribute('d', dReversed);
-						reversedPathElement.setAttribute('id', id + '-reversed');
+						reversedPathElement.setAttribute('id', `${id}-reversed`);
 						reversedPathElement.setAttribute('stroke-opacity', '0');
 						pathElement.parentNode.insertBefore(reversedPathElement, pathElement);
-						textPath.setAttributeNS("http://www.w3.org/1999/xlink", "xlink:href", '#' + id + '-reversed');
+						textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${id}-reversed`);
 					}
 				} else {
 					this.expectedIdToBeInserted = id;
 				}
 			} else {
 				console.warn('SVGPathEditor is not available (see: https://github.com/Pomax/svg-path-reverse). Fallback to flipping the text!');
+				// eslint-disable-next-line no-param-reassign
 				options.orientation = 'flip';
 			}
 		}
@@ -368,7 +376,7 @@ L.Curve = L.Path.extend({
 					refElement.parentNode.appendChild(textNode);
 				}
 			} else {
-				console.warn('unable to find ref-element (' + id + ') for text-path!');
+				console.warn(`unable to find ref-element (${id}) for text-path!`);
 			}
 		} else {
 			let textOverlayGroup = svg.querySelector('g.text-overlay');
@@ -384,18 +392,19 @@ L.Curve = L.Path.extend({
 		if (options.center) {
 			const textLength = textNode.getComputedTextLength();
 			const pathLength = this._path.getTotalLength();
-			
+
 			if (textLength === 0) {
 				textNode.setAttribute('data-options', JSON.stringify(options));
 			}
-			/* Set the position for the left side of the textNode */
+
+			// Set the position for the left side of the textNode
 			textNode.setAttribute('dx', ((pathLength / 2) - (textLength / 2)));
 		}
 
-		/* Change label rotation (if required) */
+		// Change label rotation (if required)
 		if (options.orientation) {
 			let rotateAngle = 0;
-			switch (options.orientation) {
+			switch(options.orientation) {
 				case 'flip':
 					rotateAngle = 180;
 					break;
@@ -408,13 +417,21 @@ L.Curve = L.Path.extend({
 
 			const rotatecenterX = (textNode.getBBox().x + textNode.getBBox().width / 2);
 			const rotatecenterY = (textNode.getBBox().y + textNode.getBBox().height / 2);
-			
-			textNode.setAttribute('transform','rotate(' + rotateAngle + ' '  + rotatecenterX + ' ' + rotatecenterY + ')');
+
+			textNode.setAttribute('transform', `rotate(${rotateAngle} ${rotatecenterX} ${rotatecenterY})`);
+		}
+
+		if (this._popup) {
+			L.DomEvent.on(textNode, 'click', () => {
+				setTimeout(() => {
+					this.openPopup();
+				}, 1);
+			});
 		}
 
 		this._checkTextZIndex();
 
-		/*---return the modified element back */
+		// ---return the modified element back
 		return this;
 	},
 	getTextZIndex: function() {
@@ -509,7 +526,7 @@ L.Curve = L.Path.extend({
 	}
 });
 
-L.curve = function (path, options) {
+L.curve = function(path, options) {
 	return new L.Curve(path, options);
 };
 
@@ -517,25 +534,25 @@ L.SVG.include({
 	_updatecurve: function(layer) {
 		this._setPath(layer, this._curvePointsToPath(layer._points));
 	},
- 	_curvePointsToPath: function(points) {
+	_curvePointsToPath: function(points) {
 		let point;
 		let curCommand;
 		let str = '';
 		for(let i = 0; i < points.length; i++) {
 			point = points[i];
-			if (typeof point == 'string' || point instanceof String) {
+			if (typeof point === 'string' || point instanceof String) {
 				curCommand = point;
-				str+= curCommand;
+				str += curCommand;
 			} else {
 				switch(curCommand) {
 					case 'H':
-						str+= point.x + ' ';
+						str += `${point.x} `;
 						break;
 					case 'V':
-						str+= point.y + ' ';
+						str += `${point.y} `;
 						break;
 					default:
-						str+= point.x + ',' + point.y + ' ';
+						str += `${point.x},${point.y} `;
 						break;
 				}
 			}
