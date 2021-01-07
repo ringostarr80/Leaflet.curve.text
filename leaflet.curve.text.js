@@ -320,6 +320,8 @@ L.Curve = L.Path.extend({
 
 		const dy = options.offset || this._path.getAttribute('stroke-width');
 
+		textNode.setAttribute('data-ref-id', id);
+
 		textPath.setAttributeNS('http://www.w3.org/1999/xlink', 'xlink:href', `#${id}`);
 
 		let reversedPathElement = document.getElementById(`${id}-reversed`);
@@ -421,12 +423,35 @@ L.Curve = L.Path.extend({
 			textNode.setAttribute('transform', `rotate(${rotateAngle} ${rotatecenterX} ${rotatecenterY})`);
 		}
 
-		if (this._popup) {
-			L.DomEvent.on(textNode, 'click', () => {
-				setTimeout(() => {
-					this.openPopup();
-				}, 1);
-			});
+		if (this.options.interactive) {
+			if (L.Browser.svg || !L.Browser.vml) {
+				textPath.setAttribute('class', 'leaflet-interactive');
+			}
+
+			if (this._events) {
+				const inheritableEvents = ['mouseover', 'mouseout'];
+				for(const inheritableEvent of inheritableEvents) {
+					const events = this._events[inheritableEvent];
+					if (events && events instanceof Array) {
+						for(const event of events) {
+							L.DomEvent.on(textNode, inheritableEvent, event.fn, event.ctx);
+						}
+					}
+				}
+			}
+
+			if (this._popup) {
+				L.DomEvent.on(textNode, 'click', () => {
+					setTimeout(() => {
+						this.openPopup();
+					}, 1);
+				});
+			}
+
+			const events = ['click', 'dblclick', 'mousedown', 'mouseover', 'mouseout', 'mousemove', 'contextmenu'];
+			for(let i = 0; i < events.length; i++) {
+				L.DomEvent.on(textNode, events[i], this.fire, this);
+			}
 		}
 
 		this._checkTextZIndex();
