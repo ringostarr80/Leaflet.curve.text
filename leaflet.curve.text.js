@@ -14,6 +14,7 @@ L.Curve = L.Path.extend({
 	options: {},
 	mutationObserver: null,
 	expectedIdToBeInserted: null,
+	_textOpacity: null,
 
 	initialize: function(path, options) {
 		const instance = this;
@@ -29,7 +30,7 @@ L.Curve = L.Path.extend({
 				return;
 			}
 
-			for(let mutation of mutationList) {
+			for(const mutation of mutationList) {
 				if (mutation.type !== 'childList') {
 					continue;
 				}
@@ -460,8 +461,18 @@ L.Curve = L.Path.extend({
 
 		this._checkTextZIndex();
 
+		if (this._textOpacity !== null) {
+			this._textNode.style.opacity = this._textOpacity;
+		}
+
 		// ---return the modified element back
 		return this;
+	},
+	setTextOpacity: function(opacity) {
+		this._textOpacity = opacity;
+		if (this._textNode) {
+			this._textNode.style.opacity = opacity;
+		}
 	},
 	getTextZIndex: function() {
 		return this._textZIndex;
